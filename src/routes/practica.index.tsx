@@ -1,6 +1,6 @@
+import { useI18n } from '@/lib/i18n'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { Check, Flame, Lock, Target, Zap } from 'lucide-react'
-
 import { CourseIcon } from '@/components/bacit/course-icon'
 import { GoalRing } from '@/components/bacit/goal-ring'
 import { PageHeader } from '@/components/bacit/page-header'
@@ -17,27 +17,27 @@ import {
   useProgress,
 } from '@/lib/progress'
 import { cn } from '@/lib/utils'
-
 export const Route = createFileRoute('/practica/')({
   head: () => ({ meta: [{ title: 'Practica zilnică · BacIt' }] }),
   component: PracticePage,
 })
-
 const goals = [10, 20, 30]
-
 function PracticePage() {
+  const { t, format, locale } = useI18n()
   const progress = useProgress()
   const days = streak(progress)
-  const week = history(progress, 7)
+  const week = history(progress, 7, locale)
   const today = answeredTodayTotal(progress)
   const possible = progress.dailyGoal * courses.length
-
   return (
     <div className="mx-auto max-w-content px-4 sm:px-6">
       <PageHeader
-        eyebrow="Practica zilnică"
-        title="Câte puțin, în fiecare zi"
-        description={`Răspunde la până la ${progress.dailyGoal} de întrebări pe zi în fiecare curs. Greșelile revin primele, apoi întrebările noi — așa progresul se adună singur.`}
+        eyebrow={t('Practica zilnică')}
+        title={t('Câte puțin, în fiecare zi')}
+        description={format(
+          'Răspunde la până la {0} de întrebări pe zi în fiecare curs. Greșelile revin primele, apoi întrebările noi — așa progresul se adună singur.',
+          [progress.dailyGoal],
+        )}
       />
       <div className="grid gap-5 lg:grid-cols-3">
         <div className="rounded-2xl border bg-card p-5 shadow-xs">
@@ -46,8 +46,11 @@ function PracticePage() {
               <Flame className="size-8" aria-hidden />
             </span>
             <div>
-              <p className="text-3xl font-extrabold">{days} zile</p>
-              <p className="text-sm text-muted-foreground">seria curentă</p>
+              <p className="text-3xl font-extrabold">
+                {t(days)}
+                {t(' zile')}
+              </p>
+              <p className="text-sm text-muted-foreground">{t('seria curentă')}</p>
             </div>
           </div>
           <ol className="mt-5 grid grid-cols-7 gap-1.5 text-center text-[11px]">
@@ -61,7 +64,7 @@ function PracticePage() {
                 >
                   {d.count > 0 ? <Flame className="size-4" /> : null}
                 </span>
-                <span className="text-muted-foreground capitalize">{d.label}</span>
+                <span className="text-muted-foreground capitalize">{t(d.label)}</span>
               </li>
             ))}
           </ol>
@@ -70,25 +73,28 @@ function PracticePage() {
         <div className="rounded-2xl border bg-card p-5 shadow-xs">
           <div className="flex items-center gap-4">
             <GoalRing value={today} max={possible} size={72}>
-              {today}
+              {t(today)}
             </GoalRing>
             <div>
-              <p className="text-lg font-bold">Răspunsuri azi</p>
+              <p className="text-lg font-bold">{t('Răspunsuri azi')}</p>
               <p className="text-sm text-muted-foreground">
-                din {possible} posibile în toate cursurile
+                {t('din ')}
+                {t(possible)}
+                {t(' posibile în toate cursurile')}
               </p>
             </div>
           </div>
           <p className="mt-4 flex items-center gap-1.5 text-sm font-semibold text-primary">
-            <Zap className="size-4" aria-hidden /> {progress.xp} XP în total · +10 XP pentru
-            fiecare răspuns corect
+            <Zap className="size-4" aria-hidden /> {t(progress.xp)}
+            {t(' XP în total · +10 XP pentru fiecare răspuns corect')}
           </p>
         </div>
 
         <fieldset className="rounded-2xl border bg-card p-5 shadow-xs">
-          <legend className="sr-only">Obiectivul zilnic</legend>
+          <legend className="sr-only">{t('Obiectivul zilnic')}</legend>
           <p className="flex items-center gap-2 font-bold">
-            <Target className="size-5 text-primary" aria-hidden /> Obiectiv pe curs, pe zi
+            <Target className="size-5 text-primary" aria-hidden />
+            {t(' Obiectiv pe curs, pe zi')}
           </p>
           <div className="mt-4 grid grid-cols-3 gap-2">
             {goals.map((goal) => (
@@ -104,9 +110,9 @@ function PracticePage() {
                     : 'hover:border-primary/40',
                 )}
               >
-                <span className="block text-2xl font-extrabold">{goal}</span>
+                <span className="block text-2xl font-extrabold">{t(goal)}</span>
                 <span className="text-xs text-muted-foreground">
-                  {goal === 10 ? 'lejer' : goal === 20 ? 'constant' : 'intens'}
+                  {t(goal === 10 ? 'lejer' : goal === 20 ? 'constant' : 'intens')}
                 </span>
               </button>
             ))}
@@ -114,7 +120,7 @@ function PracticePage() {
         </fieldset>
       </div>
 
-      <h2 className="mt-10 mb-4 text-xl font-bold">Cursurile tale de azi</h2>
+      <h2 className="mt-10 mb-4 text-xl font-bold">{t('Cursurile tale de azi')}</h2>
       <ul className="grid gap-4 md:grid-cols-2">
         {courses.map((course) => {
           const done = answeredToday(progress, course.id)
@@ -126,32 +132,39 @@ function PracticePage() {
               className="flex flex-wrap items-center gap-4 rounded-2xl border bg-card p-5 shadow-xs"
             >
               <GoalRing value={done} max={progress.dailyGoal} color={courseColor(course)}>
-                {complete ? (
-                  <Check className="size-5 text-success" />
-                ) : (
-                  `${done}/${progress.dailyGoal}`
+                {t(
+                  complete ? (
+                    <Check className="size-5 text-success" />
+                  ) : (
+                    `${done}/${progress.dailyGoal}`
+                  ),
                 )}
               </GoalRing>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
                   <CourseIcon course={course} className="size-7 rounded-lg" />
-                  <h3 className="font-bold">{course.title}</h3>
+                  <h3 className="font-bold">{t(course.title)}</h3>
                 </div>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  Stăpânire {mastery(progress, ids)}% · {ids.length} întrebări în bancă
+                  {t('Stăpânire ')}
+                  {t(mastery(progress, ids))}% · {t(ids.length)}
+                  {t(' întrebări în bancă')}
                 </p>
                 <ModuleSteps course={course} />
               </div>
-              {complete ? (
-                <Button variant="secondary" disabled>
-                  <Lock /> Revino mâine
-                </Button>
-              ) : (
-                <Button asChild>
-                  <Link to="/practica/$courseId" params={{ courseId: course.id }}>
-                    {done ? 'Continuă' : 'Începe'}
-                  </Link>
-                </Button>
+              {t(
+                complete ? (
+                  <Button variant="secondary" disabled>
+                    <Lock />
+                    {t(' Revino mâine')}
+                  </Button>
+                ) : (
+                  <Button asChild>
+                    <Link to="/practica/$courseId" params={{ courseId: course.id }}>
+                      {t(done ? 'Continuă' : 'Începe')}
+                    </Link>
+                  </Button>
+                ),
               )}
             </li>
           )
@@ -160,12 +173,12 @@ function PracticePage() {
     </div>
   )
 }
-
 function ModuleSteps({ course }: { course: Course }) {
+  const { t, format } = useI18n()
   const progress = useProgress()
   const color = courseColor(course)
   return (
-    <ol className="mt-3 flex items-center gap-1" aria-label="Progres pe module">
+    <ol className="mt-3 flex items-center gap-1" aria-label={t('Progres pe module')}>
       {course.modules.map((module, i) => {
         const percent = mastery(
           progress,
@@ -175,7 +188,7 @@ function ModuleSteps({ course }: { course: Course }) {
           <li
             key={module.id}
             className="flex items-center gap-1"
-            title={`${module.title}: ${percent}%`}
+            title={format('{0}: {1}%', [module.title, percent])}
           >
             {i > 0 && <span className="h-0.5 w-3 rounded bg-border" aria-hidden />}
             <span
@@ -189,10 +202,10 @@ function ModuleSteps({ course }: { course: Course }) {
                 color: percent >= 80 ? 'white' : undefined,
               }}
             >
-              {i + 1}
+              {t(i + 1)}
             </span>
             <span className="sr-only">
-              {module.title}: {percent}%
+              {t(module.title)}: {t(percent)}%
             </span>
           </li>
         )

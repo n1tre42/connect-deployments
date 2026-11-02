@@ -23,9 +23,7 @@ describe('overlays', () => {
           <DropdownMenuSub>
             <DropdownMenuSubTrigger>Export</DropdownMenuSubTrigger>
             <DropdownMenuSubContent>
-              <DropdownMenuItem onSelect={selected}>
-                Export PDF
-              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={selected}>Export PDF</DropdownMenuItem>
             </DropdownMenuSubContent>
           </DropdownMenuSub>
         </DropdownMenuContent>

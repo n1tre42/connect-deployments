@@ -60,16 +60,9 @@ export function ValidatedForm({
               <FormItem>
                 <FormLabel>Email</FormLabel>
                 <FormControl>
-                  <Input
-                    type="email"
-                    autoComplete="email"
-                    required
-                    {...field}
-                  />
+                  <Input type="email" autoComplete="email" required {...field} />
                 </FormControl>
-                <FormDescription>
-                  Use the address where we can reach you.
-                </FormDescription>
+                <FormDescription>Use the address where we can reach you.</FormDescription>
                 <FormMessage />
               </FormItem>
             )}

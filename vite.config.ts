@@ -6,7 +6,12 @@ import netlify from '@netlify/vite-plugin-tanstack-start'
 
 const config = defineConfig({
   resolve: { tsconfigPaths: true },
-  plugins: [tailwindcss(), netlify(), tanstackStart(), viteReact()],
+  plugins: [
+    tailwindcss(),
+    ...(process.env.BACIT_LOCAL_PREVIEW === '1' ? [] : [netlify()]),
+    tanstackStart(),
+    viteReact(),
+  ],
 })
 
 export default config

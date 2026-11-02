@@ -4,12 +4,7 @@ import { describe, expect, it } from 'vitest'
 import { Checkbox } from './checkbox'
 import { RadioGroup, RadioGroupItem } from './radio-group'
 import { Switch } from './switch'
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from './accordion'
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './accordion'
 import { Label } from './label'
 
 describe('form controls', () => {

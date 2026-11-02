@@ -4,11 +4,11 @@ This document describes the project for developers and AI agents working on this
 
 ## Project Overview
 
-**BacIt** is a free, Romanian-language prep platform for the Certiport IT Specialist exams (Python, Baze de date, Rețelistică, HTML5, Dispozitive), aimed at students in Moldova. Learners watch curated lessons, answer questions after each lesson, keep a daily practice streak, take timed exam simulations, browse a glossary, and track everything in a personal cabinet.
+**BacIt** is a free Romanian / English prep platform for the Certiport IT Specialist exams, aimed at students in Moldova. It includes Python, Baze de date, Rețelistică, HTML5, Dispozitive and Python Next Generation (137 questions and 21 executable Python labs). Learners watch 15–20 minute video lessons, practice questions, take theory or combined simulations and track progress in a personal dashboard.
 
 The app was rebuilt from an earlier compiled deploy (only built JS/CSS survived, no source). Course, question, and glossary content was extracted verbatim from that bundle into `src/data/`, and the screens were reconstructed to match the original. The exam runner (`/simulari/$courseId/$variant`), glossary (`/glosar`), and cabinet (`/cabinet`) were linked from the old deploy but never shipped; they were built fresh in the same style.
 
-All learner state lives in `localStorage` (key `bacit-progress-v1`) through `src/lib/progress.ts`; there is no backend, account system, or database yet. UI copy is Romanian — keep it that way.
+All learner state lives in `localStorage` (key `bacit-progress-v1`) through `src/lib/progress.ts`; there is no backend, account system, or database yet. Keep UI and learning content bilingual (RO / EN), using `useI18n()` and `bilingual()`; do not translate program code or answer IDs. The language preference uses `bacit-language`. Courses contain videos only, with verified durations of 900–1200 seconds; do not reintroduce reading lessons or external reading resources.
 
 ### Tech Stack
 
