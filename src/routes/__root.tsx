@@ -1,18 +1,15 @@
 import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
-
 import { Toaster } from '@/components/ui/sonner'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { NotFoundPage } from '@/components/error-pages'
 import { SiteFooter } from '@/components/bacit/site-footer'
 import { SiteHeader } from '@/components/bacit/site-header'
 import { themeScript } from '@/lib/theme'
-
+import { LanguageProvider } from '@/lib/i18n'
 import '../styles.css'
-
 const siteName = 'BacIt — pregătire pentru examenele IT Specialist'
 const siteDescription =
   'BacIt: cursuri video, întrebări zilnice, glosar Certiport și simulări de examen pentru Python, Baze de date, Rețelistică, HTML5 și Dispozitive.'
-
 export const Route = createRootRoute({
   head: () => ({
     meta: [
@@ -65,7 +62,6 @@ export const Route = createRootRoute({
   shellComponent: RootDocument,
   notFoundComponent: NotFoundPage,
 })
-
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ro" suppressHydrationWarning>
@@ -73,16 +69,18 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        <TooltipProvider>
-          <div className="flex min-h-screen flex-col">
-            <SiteHeader />
-            <main id="continut" className="flex-1">
-              {children}
-            </main>
-            <SiteFooter />
-          </div>
-        </TooltipProvider>
-        <Toaster />
+        <LanguageProvider>
+          <TooltipProvider>
+            <div className="flex min-h-screen flex-col">
+              <SiteHeader />
+              <main id="continut" className="flex-1">
+                {children}
+              </main>
+              <SiteFooter />
+            </div>
+          </TooltipProvider>
+          <Toaster />
+        </LanguageProvider>
         <Scripts />
       </body>
     </html>

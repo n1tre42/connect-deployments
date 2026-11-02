@@ -1,12 +1,11 @@
+import { useI18n } from '@/lib/i18n'
 import { useMemo, useState } from 'react'
 import { CircleCheck, CircleX, GripVertical, Lightbulb } from 'lucide-react'
-
 import { Badge } from '@/components/ui/badge'
 import type { ChoiceQuestion, MatchingQuestion, Question } from '@/data/questions'
 import { isCorrect, questionTypeLabels, type Answer } from '@/lib/quiz'
 import { hashString, seededRandom, shuffle } from '@/lib/random'
 import { cn } from '@/lib/utils'
-
 export function CodeBlock({ code }: { code: string }) {
   return (
     <pre className="overflow-x-auto rounded-xl bg-code-bg p-4 text-[13px] leading-relaxed text-code-fg">
@@ -14,7 +13,6 @@ export function CodeBlock({ code }: { code: string }) {
     </pre>
   )
 }
-
 /** One question with its answer controls; `revealed` shows correctness and the explanation. */
 export function QuestionView({
   question,
@@ -29,56 +27,66 @@ export function QuestionView({
   revealed: boolean
   moduleTitle?: string
 }) {
+  const { t } = useI18n()
   const correct = revealed && isCorrect(question, answer)
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-2">
-        <Badge className="rounded-md">{questionTypeLabels[question.type]}</Badge>
-        {moduleTitle && <span className="text-xs text-muted-foreground">{moduleTitle}</span>}
+        <Badge className="rounded-md">{t(questionTypeLabels[question.type])}</Badge>
+        {moduleTitle && (
+          <span className="text-xs text-muted-foreground">{t(moduleTitle)}</span>
+        )}
       </div>
-      <h3 className="text-lg leading-snug font-semibold text-balance">{question.text}</h3>
+      <h3 className="text-lg leading-snug font-semibold text-balance">
+        {t(question.text)}
+      </h3>
       {question.code && <CodeBlock code={question.code} />}
-      {question.type === 'matching' ? (
-        <MatchingInput
-          question={question}
-          value={(answer as Record<string, string>) ?? {}}
-          onChange={onChange}
-          revealed={revealed}
-        />
-      ) : (
-        <ChoiceInput
-          question={question}
-          value={(answer as string[]) ?? []}
-          onChange={onChange}
-          revealed={revealed}
-        />
+      {t(
+        question.type === 'matching' ? (
+          <MatchingInput
+            question={question}
+            value={(answer as Record<string, string>) ?? {}}
+            onChange={onChange}
+            revealed={revealed}
+          />
+        ) : (
+          <ChoiceInput
+            question={question}
+            value={(answer as string[]) ?? []}
+            onChange={onChange}
+            revealed={revealed}
+          />
+        ),
       )}
-      {revealed && (
-        <div
-          role="status"
-          className={cn(
-            'flex gap-3 rounded-xl p-4 text-sm',
-            correct ? 'bg-success-soft' : 'bg-danger-soft',
-          )}
-        >
-          {correct ? (
-            <CircleCheck className="mt-0.5 size-5 shrink-0 text-success" />
-          ) : (
-            <CircleX className="mt-0.5 size-5 shrink-0 text-destructive" />
-          )}
-          <div className="space-y-1">
-            <p className="font-semibold">{correct ? 'Corect!' : 'Nu chiar.'}</p>
-            <p className="flex gap-1.5 text-foreground/85">
-              <Lightbulb className="mt-0.5 size-4 shrink-0 text-warning" aria-hidden />
-              {question.explanation}
-            </p>
+      {t(
+        revealed && (
+          <div
+            role="status"
+            className={cn(
+              'flex gap-3 rounded-xl p-4 text-sm',
+              correct ? 'bg-success-soft' : 'bg-danger-soft',
+            )}
+          >
+            {t(
+              correct ? (
+                <CircleCheck className="mt-0.5 size-5 shrink-0 text-success" />
+              ) : (
+                <CircleX className="mt-0.5 size-5 shrink-0 text-destructive" />
+              ),
+            )}
+            <div className="space-y-1">
+              <p className="font-semibold">{t(correct ? 'Corect!' : 'Nu chiar.')}</p>
+              <p className="flex gap-1.5 text-foreground/85">
+                <Lightbulb className="mt-0.5 size-4 shrink-0 text-warning" aria-hidden />
+                {t(question.explanation)}
+              </p>
+            </div>
           </div>
-        </div>
+        ),
       )}
     </div>
   )
 }
-
 function ChoiceInput({
   question,
   value,
@@ -90,15 +98,19 @@ function ChoiceInput({
   onChange: (answer: string[]) => void
   revealed: boolean
 }) {
+  const { t } = useI18n()
   const multiple = question.type === 'multiple'
   const code = question.type === 'code_output'
   return (
     <fieldset className="grid gap-2">
-      <legend className="sr-only">Variante de răspuns</legend>
-      {multiple && (
-        <p className="text-xs text-muted-foreground">
-          Alege toate variantele corecte ({question.correct.length}).
-        </p>
+      <legend className="sr-only">{t('Variante de răspuns')}</legend>
+      {t(
+        multiple && (
+          <p className="text-xs text-muted-foreground">
+            {t('Alege toate variantele corecte ( ')}
+            {t(question.correct.length)}).
+          </p>
+        ),
       )}
       {question.options.map((option) => {
         const selected = value.includes(option.id)
@@ -131,9 +143,11 @@ function ChoiceInput({
               }
               className="size-4 accent-[var(--primary)]"
             />
-            <span className={cn('flex-1', code && 'font-mono')}>{option.text}</span>
-            {revealed && right && (
-              <CircleCheck className="size-4 text-success" aria-label="Corect" />
+            <span className={cn('flex-1', code && 'font-mono')}>{t(option.text)}</span>
+            {t(
+              revealed && right && (
+                <CircleCheck className="size-4 text-success" aria-label={t('Corect')} />
+              ),
             )}
           </label>
         )
@@ -141,7 +155,6 @@ function ChoiceInput({
     </fieldset>
   )
 }
-
 function MatchingInput({
   question,
   value,
@@ -153,6 +166,7 @@ function MatchingInput({
   onChange: (answer: Record<string, string>) => void
   revealed: boolean
 }) {
+  const { t, format } = useI18n()
   const chips = useMemo(
     () =>
       shuffle(
@@ -165,7 +179,6 @@ function MatchingInput({
   const [hover, setHover] = useState<string | null>(null)
   const used = new Set(Object.values(value))
   const available = chips.filter((c) => !used.has(c))
-
   function place(target: string, chip: string) {
     const next = { ...value }
     for (const [t, c] of Object.entries(next)) if (c === chip) delete next[t]
@@ -173,23 +186,28 @@ function MatchingInput({
     onChange(next)
     setPicked(null)
   }
-
   function remove(target: string) {
     const next = { ...value }
     delete next[target]
     onChange(next)
   }
-
   return (
     <div className="space-y-4">
       <p className="text-xs text-muted-foreground">
-        Trage fiecare element în rândul potrivit sau apasă pe un element, apoi pe rând.
+        {t(
+          'Trage fiecare element în rândul potrivit sau apasă pe un element, apoi pe rând.',
+        )}
       </p>
-      <div className="flex min-h-11 flex-wrap gap-2" aria-label="Elemente disponibile">
-        {available.length === 0 && !revealed && (
-          <span className="text-sm text-muted-foreground">
-            Toate elementele au fost plasate.
-          </span>
+      <div
+        className="flex min-h-11 flex-wrap gap-2"
+        aria-label={t('Elemente disponibile')}
+      >
+        {t(
+          available.length === 0 && !revealed && (
+            <span className="text-sm text-muted-foreground">
+              {t('Toate elementele au fost plasate.')}
+            </span>
+          ),
         )}
         {available.map((chip) => (
           <button
@@ -209,7 +227,7 @@ function MatchingInput({
             )}
           >
             <GripVertical className="size-3 opacity-60" aria-hidden />
-            {chip}
+            {t(chip)}
           </button>
         ))}
       </div>
@@ -241,36 +259,41 @@ function MatchingInput({
                 wrong && 'bg-danger-soft',
               )}
             >
-              <span className="font-medium">{pair.target}</span>
-              {placed ? (
-                <button
-                  type="button"
-                  disabled={revealed}
-                  onClick={() => remove(pair.target)}
-                  className="inline-flex w-fit items-center gap-1.5 rounded-full border bg-card px-3 py-1 font-mono text-xs font-semibold"
-                  aria-label={`${placed} — apasă pentru a scoate`}
-                >
-                  {right && <CircleCheck className="size-3.5 text-success" />}
-                  {wrong && <CircleX className="size-3.5 text-destructive" />}
-                  {placed}
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  disabled={revealed || !picked}
-                  onClick={() => picked && place(pair.target, picked)}
-                  className={cn(
-                    'h-8 rounded-md border border-dashed px-3 text-left text-xs text-muted-foreground',
-                    picked && 'border-primary text-primary',
-                  )}
-                >
-                  {picked ? `Plasează „${picked}”` : 'Apasă aici'}
-                </button>
+              <span className="font-medium">{t(pair.target)}</span>
+              {t(
+                placed ? (
+                  <button
+                    type="button"
+                    disabled={revealed}
+                    onClick={() => remove(pair.target)}
+                    className="inline-flex w-fit items-center gap-1.5 rounded-full border bg-card px-3 py-1 font-mono text-xs font-semibold"
+                    aria-label={format('{0} — apasă pentru a scoate', [placed])}
+                  >
+                    {right && <CircleCheck className="size-3.5 text-success" />}
+                    {wrong && <CircleX className="size-3.5 text-destructive" />}
+                    {t(placed)}
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    disabled={revealed || !picked}
+                    onClick={() => picked && place(pair.target, picked)}
+                    className={cn(
+                      'h-8 rounded-md border border-dashed px-3 text-left text-xs text-muted-foreground',
+                      picked && 'border-primary text-primary',
+                    )}
+                  >
+                    {t(picked ? `Plasează „${picked}”` : 'Apasă aici')}
+                  </button>
+                ),
               )}
-              {wrong && (
-                <span className="col-start-2 text-xs text-success">
-                  Corect: <strong className="font-mono">{pair.answer}</strong>
-                </span>
+              {t(
+                wrong && (
+                  <span className="col-start-2 text-xs text-success">
+                    {t('Corect: ')}
+                    <strong className="font-mono">{t(pair.answer)}</strong>
+                  </span>
+                ),
               )}
             </div>
           )

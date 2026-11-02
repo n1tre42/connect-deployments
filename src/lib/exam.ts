@@ -28,7 +28,10 @@ export function buildExam(course: Course, variant: number): Question[] {
 
 /** Exam time scaled to the number of questions actually available. */
 export function examMinutes(course: Course, questionCount: number) {
-  return Math.max(10, Math.round((course.exam.minutes * questionCount) / course.exam.questions))
+  return Math.max(
+    10,
+    Math.round((course.exam.minutes * questionCount) / course.exam.questions),
+  )
 }
 
 /** Certiport-style score on a 0–1000 scale. */

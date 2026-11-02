@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.netlify/
+.tanstack/
+src/routeTree.gen.ts
+.cache/
+*.log
+playwright-report/
+test-results/

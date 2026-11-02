@@ -8,7 +8,11 @@ import { useSyncExternalStore } from 'react'
 
 export type AnswerRecord = { correct: boolean; attempts: number; at: number }
 
-export type ExamDomainResult = { module: string; correct: number; total: number }
+export type ExamDomainResult = {
+  module: string
+  correct: number
+  total: number
+}
 
 export type ExamRecord = {
   id: string
@@ -20,6 +24,7 @@ export type ExamRecord = {
   at: number
   seconds: number
   domains: ExamDomainResult[]
+  kind?: 'combined'
 }
 
 export type Profile = {
@@ -30,6 +35,9 @@ export type Profile = {
 }
 
 export type ProgressState = {
+  labDrafts: Record<string, string>
+  labs: Record<string, { passed: boolean; tests: number; total: number; at: number }>
+  lastLesson?: { course: string; lesson: string }
   watched: Record<string, true>
   answers: Record<string, AnswerRecord>
   /** Answers per day (YYYY-MM-DD) per course id. */
@@ -51,6 +59,8 @@ const defaultProfile: Profile = {
 }
 
 const initialState: ProgressState = {
+  labDrafts: {},
+  labs: {},
   watched: {},
   answers: {},
   daily: {},
@@ -70,7 +80,14 @@ function load() {
   loaded = true
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
-    if (raw) state = { ...initialState, ...JSON.parse(raw) }
+    if (raw) {
+      const stored = JSON.parse(raw)
+      state = {
+        ...initialState,
+        ...stored,
+        profile: { ...defaultProfile, ...stored.profile },
+      }
+    }
   } catch {
     state = initialState
   }
@@ -124,6 +141,35 @@ export function toggleWatched(lessonId: string) {
   })
 }
 
+export function rememberLesson(course: string, lesson: string) {
+  if (state.lastLesson?.course === course && state.lastLesson.lesson === lesson) return
+  update((s) => ({ ...s, lastLesson: { course, lesson } }))
+}
+
+export function saveLabDraft(id: string, code: string) {
+  update((s) => ({ ...s, labDrafts: { ...s.labDrafts, [id]: code } }))
+}
+
+export function recordLab(id: string, tests: number, total: number) {
+  update((s) => {
+    const passed = total > 0 && tests === total
+    const alreadyPassed = s.labs[id]?.passed
+    return {
+      ...s,
+      xp: s.xp + (passed && !alreadyPassed ? 25 : 0),
+      labs: {
+        ...s.labs,
+        [id]: {
+          passed: passed || !!alreadyPassed,
+          tests,
+          total,
+          at: Date.now(),
+        },
+      },
+    }
+  })
+}
+
 export function recordAnswer(
   questionId: string,
   correct: boolean,
@@ -133,7 +179,11 @@ export function recordAnswer(
     const prev = s.answers[questionId]
     const answers = {
       ...s.answers,
-      [questionId]: { correct, attempts: (prev?.attempts ?? 0) + 1, at: Date.now() },
+      [questionId]: {
+        correct,
+        attempts: (prev?.attempts ?? 0) + 1,
+        at: Date.now(),
+      },
     }
     let daily = s.daily
     if (options.daily) {
@@ -202,7 +252,7 @@ export function streak(s: ProgressState) {
   return count
 }
 
-export function history(s: ProgressState, days = 14) {
+export function history(s: ProgressState, days = 14, locale = 'ro-RO') {
   const out: { day: string; label: string; count: number }[] = []
   const d = new Date()
   d.setDate(d.getDate() - (days - 1))
@@ -210,7 +260,7 @@ export function history(s: ProgressState, days = 14) {
     const key = dayKey(d)
     out.push({
       day: key,
-      label: d.toLocaleDateString('ro-RO', { weekday: 'short' }).slice(0, 2),
+      label: d.toLocaleDateString(locale, { weekday: 'short' }).slice(0, 2),
       count: dayTotal(s, key),
     })
     d.setDate(d.getDate() + 1)

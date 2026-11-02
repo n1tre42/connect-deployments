@@ -4,9 +4,7 @@ import * as React from 'react'
 import { cn } from '@/lib/utils'
 import * as PopoverPrimitive from '@radix-ui/react-popover'
 
-function Popover({
-  ...props
-}: React.ComponentProps<typeof PopoverPrimitive.Root>) {
+function Popover({ ...props }: React.ComponentProps<typeof PopoverPrimitive.Root>) {
   return <PopoverPrimitive.Root data-slot="popover" {...props} />
 }
 
@@ -56,18 +54,11 @@ function PopoverHeader({ className, ...props }: React.ComponentProps<'div'>) {
 
 function PopoverTitle({ className, ...props }: React.ComponentProps<'h2'>) {
   return (
-    <h2
-      data-slot="popover-title"
-      className={cn('font-medium', className)}
-      {...props}
-    />
+    <h2 data-slot="popover-title" className={cn('font-medium', className)} {...props} />
   )
 }
 
-function PopoverDescription({
-  className,
-  ...props
-}: React.ComponentProps<'p'>) {
+function PopoverDescription({ className, ...props }: React.ComponentProps<'p'>) {
   return (
     <p
       data-slot="popover-description"
