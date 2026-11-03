@@ -4037,7 +4037,7 @@ export const expandedQuestions: Record<string, Question[]> = {
     ...take(networkFacts, '02-hardware', 6),
     ...take(networkFacts, '03-protocoale-servicii', 6),
     ...take(networkFacts, '04-securitate', 6),
-    ...take(networkFacts, '05-depanare', 6),
+    ...take(networkFacts, '05-depanare', 5),
   ]),
   html5: buildCourse('html5', htmlFacts),
   'configurare-dispozitive': buildCourse('configurare-dispozitive', deviceFacts),
