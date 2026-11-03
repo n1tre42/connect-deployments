@@ -3,7 +3,7 @@ import { hashString, seededRandom, shuffle } from '@/lib/random'
 import type { Question } from './questions'
 
 type Pair = readonly [string, string]
-type Fact = {
+export type Fact = {
   module: string
   prompt: Pair
   scenario: Pair
@@ -71,7 +71,7 @@ function buildCourse(course: string, facts: Fact[], offset = 0): Question[] {
   return result
 }
 
-const pythonFacts: Fact[] = [
+export const pythonFacts: Fact[] = [
   f(
     '01-tipuri-date-operatori',
     [
@@ -708,7 +708,7 @@ const pythonFacts: Fact[] = [
   ),
 ]
 
-const databaseFacts: Fact[] = [
+export const databaseFacts: Fact[] = [
   f(
     '01-proiectare',
     [
@@ -1479,7 +1479,7 @@ const databaseFacts: Fact[] = [
   ),
 ]
 
-const networkFacts: Fact[] = [
+export const networkFacts: Fact[] = [
   f(
     '01-infrastructura',
     [
@@ -2394,7 +2394,7 @@ const networkFacts: Fact[] = [
   ),
 ]
 
-const htmlFacts: Fact[] = [
+export const htmlFacts: Fact[] = [
   f(
     '01-ciclu-viata',
     [
@@ -3191,7 +3191,7 @@ const htmlFacts: Fact[] = [
   ),
 ]
 
-const deviceFacts: Fact[] = [
+export const deviceFacts: Fact[] = [
   f(
     '01-configurare',
     [
