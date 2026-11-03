@@ -2,6 +2,7 @@ import { freshBank } from './fresh-questions'
 import { systemsBank } from './systems-questions'
 import { extraBank } from './extra-questions'
 import { expandedQuestions } from './question-expansion'
+import { maximumQuestions } from './maximum-question-expansion'
 import { pythonNextQuestions } from './python-next'
 
 export type QuestionType =
@@ -39,6 +40,9 @@ const bank: Record<string, Question[]> = {
 }
 for (const [id, extra] of Object.entries(extraBank)) bank[id] = [...bank[id], ...extra]
 for (const [id, extra] of Object.entries(expandedQuestions)) {
+  bank[id] = [...(bank[id] ?? []), ...extra]
+}
+for (const [id, extra] of Object.entries(maximumQuestions)) {
   bank[id] = [...(bank[id] ?? []), ...extra]
 }
 
