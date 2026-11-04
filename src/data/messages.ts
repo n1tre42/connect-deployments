@@ -1,4 +1,11 @@
 export const messages: Record<string, string> = {
+  'Pagina nu a fost găsită': 'Page not found',
+  'Această pagină nu există. Verifică adresa sau revino la pagina principală.':
+    'This page doesn’t exist. Check the address or return to the home page.',
+  'Pagina nu s-a încărcat': 'This page couldn’t load',
+  'Încearcă din nou sau revino la pagina principală.':
+    'Please try again, or return to the home page.',
+  'Încearcă din nou': 'Try again',
   'Tipuri de date, controlul fluxului, fișiere, erori și module — tot ce cere examenul.':
     'Data types, flow control, files, errors, and modules — the core exam objectives.',
   'Proiectare relațională, DDL, interogări SELECT și JOIN, manipularea datelor.':

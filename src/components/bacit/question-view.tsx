@@ -27,7 +27,7 @@ export function QuestionView({
   revealed: boolean
   moduleTitle?: string
 }) {
-  const { t } = useI18n()
+  const { t, language } = useI18n()
   const correct = revealed && isCorrect(question, answer)
   return (
     <div className="space-y-4">
@@ -40,6 +40,13 @@ export function QuestionView({
       <h3 className="text-lg leading-snug font-semibold text-balance">
         {t(question.text)}
       </h3>
+      {language === 'ru' && (
+        <p className="text-xs text-muted-foreground" role="note">
+          {t(
+            'Întrebarea este afișată în limba originală; traducerea rusă nu este disponibilă încă.',
+          )}
+        </p>
+      )}
       {question.code && <CodeBlock code={question.code} />}
       {t(
         question.type === 'matching' ? (
