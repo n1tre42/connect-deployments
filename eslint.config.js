@@ -11,6 +11,7 @@ export default tseslint.config(
       'output/**',
       'scripts/**',
       '.netlify/**',
+      '.vercel/**',
       '.tanstack/**',
       'src/routeTree.gen.ts',
     ],
