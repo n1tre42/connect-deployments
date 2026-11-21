@@ -1,20 +1,23 @@
 import { beforeEach, expect, it, vi } from 'vitest'
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
-import { CombinedSimulation } from '@/routes/python-next-generation'
+import { fireEvent, render, screen, waitFor, cleanup } from '@testing-library/react'
+import { NgRehearsal } from './ng-rehearsal'
 import { LanguageProvider } from '@/lib/i18n'
 import { getProgress, resetProgress } from '@/lib/progress'
 import { runPython } from '@/lib/python-runner'
-import { questionsFor } from '@/data/questions'
-import { pythonLabs } from '@/data/python-labs'
-import { seededRandom, shuffle } from '@/lib/random'
-
+import { buildNgRehearsal } from '@/lib/ng-rehearsal'
 vi.mock('@/lib/python-runner', () => ({ runPython: vi.fn() }))
 beforeEach(() => {
+  cleanup()
+  sessionStorage.clear()
   resetProgress()
   localStorage.setItem('bacit-language', 'en')
   vi.mocked(runPython).mockReset()
 })
-it('grades theory and all three executable labs together and records one result', async () => {
+const finish = () => {
+  fireEvent.click(screen.getByRole('button', { name: 'Finish section' }))
+  fireEvent.click(screen.getByRole('button', { name: 'Confirm and continue' }))
+}
+it('locks sections, grades every lab and records one attempt', async () => {
   vi.mocked(runPython).mockImplementation(async (_code, tests = []) => ({
     output: '',
     passed: tests.length,
@@ -22,68 +25,53 @@ it('grades theory and all three executable labs together and records one result'
   }))
   render(
     <LanguageProvider>
-      <CombinedSimulation />
+      <NgRehearsal kind="short" />
     </LanguageProvider>,
   )
-  fireEvent.click(screen.getByRole('button', { name: 'Start combined simulation' }))
-  const questions = shuffle(
-    questionsFor('python-next-generation'),
-    seededRandom(7919),
-  ).slice(0, 12)
-  for (const question of questions) {
-    if (question.type === 'matching') throw new Error('Unexpected matching question')
-    for (const id of question.correct)
-      fireEvent.click(
-        screen.getByRole('radio', {
-          name: question.options.find((o) => o.id === id)!.text,
-        }),
-      )
-    fireEvent.click(screen.getByRole('button', { name: 'Next' }))
+  fireEvent.click(await screen.findByRole('button', { name: 'Start practice' }))
+  finish()
+  await screen.findByText('Task files')
+  expect(
+    screen.queryByRole('navigation', { name: 'Section questions' }),
+  ).not.toBeInTheDocument()
+  const plan = buildNgRehearsal(7919, 'short')
+  for (const [i, l] of plan.labs.entries()) {
+    fireEvent.click(screen.getByRole('button', { name: 'task-' + (i + 1) + '.py' }))
+    const input = screen.getByLabelText('Your Python code') as HTMLTextAreaElement
+    const prefix = input.value.split('\n').slice(0, 2).join('\n') + '\n'
+    fireEvent.change(input, { target: { value: prefix + l.solution } })
   }
-  const labs = shuffle(pythonLabs, seededRandom(7920)).slice(0, 3)
-  for (let i = 0; i < labs.length; i++) {
-    fireEvent.change(screen.getByLabelText('Your Python code'), {
-      target: { value: labs[i].solution },
-    })
-    if (i < labs.length - 1) fireEvent.click(screen.getByRole('button', { name: 'Next' }))
-  }
-  fireEvent.click(screen.getByRole('button', { name: 'Submit simulation' }))
-  await screen.findByText('1000/1000')
-  expect(runPython).toHaveBeenCalledTimes(3)
+  finish()
+  await screen.findByText('Practice result')
   expect(getProgress().exams).toHaveLength(1)
   expect(getProgress().exams[0]).toMatchObject({
     kind: 'combined',
-    percent: 100,
-    correct: 15,
+    correct: 3,
     total: 15,
+    percent: 20,
   })
-  expect(getProgress().xp).toBe(195)
+  expect(runPython).toHaveBeenCalledTimes(4)
 })
-it('does not grade download failures and allows retrying without duplicating progress', async () => {
-  vi.mocked(runPython).mockResolvedValue({
+it('pauses on failed loading and retries without recording failure', async () => {
+  vi.mocked(runPython).mockResolvedValueOnce({
     output: '',
     error: 'Network failure',
     infrastructure: true,
     passed: 0,
-    total: 3,
+    total: 0,
   })
   render(
     <LanguageProvider>
-      <CombinedSimulation />
+      <NgRehearsal kind="exam" />
     </LanguageProvider>,
   )
-  fireEvent.click(screen.getByRole('button', { name: 'Start combined simulation' }))
-  fireEvent.click(screen.getByRole('button', { name: 'Submit simulation' }))
+  fireEvent.click(await screen.findByRole('button', { name: 'Start practice' }))
+  finish()
   await screen.findByRole('alert')
   expect(getProgress().exams).toHaveLength(0)
   expect(getProgress().xp).toBe(0)
-  vi.mocked(runPython).mockImplementation(async (_code, tests = []) => ({
-    output: '',
-    error: 'NotImplementedError',
-    passed: 0,
-    total: tests.length,
-  }))
-  fireEvent.click(screen.getByRole('button', { name: 'Retry checking' }))
-  await waitFor(() => expect(getProgress().exams).toHaveLength(1))
-  expect(getProgress().exams[0].correct).toBe(0)
+  vi.mocked(runPython).mockResolvedValue({ output: 'ready', passed: 0, total: 0 })
+  fireEvent.click(screen.getByRole('button', { name: 'Retry loading' }))
+  await waitFor(() => expect(screen.getByText('Task files')).toBeInTheDocument())
+  expect(screen.getAllByRole('button', { name: /task-\d.py/ })).toHaveLength(7)
 })

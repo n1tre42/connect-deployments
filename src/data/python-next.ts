@@ -21,13 +21,13 @@ export const pythonNextCourse: Course = {
     'Python Next Generation — theory and practice',
   ),
   tagline: b(
-    '137 de întrebări și 21 de laburi cu Python executabil. Simulare combinată sau practică separată.',
-    '137 questions and 21 labs with executable Python. Combined simulation or separate practice.',
+    'Întrebări cu explicații, 21 de laburi și repetiție pe secțiuni.',
+    'Explained questions, 21 labs and section-based rehearsal.',
   ),
   hue: 155,
   icon: 'python',
-  questionTarget: 137,
-  exam: { questions: 35, minutes: 60, passPercent: 70 },
+  questionTarget: 157,
+  exam: { questions: 35, minutes: 50, passPercent: 70 },
   modules: pythonNextModules.map(([id, ro, en], i) => ({
     id,
     title: b(ro, en),

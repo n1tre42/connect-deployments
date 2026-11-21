@@ -15,6 +15,7 @@ import { Logo } from './logo'
 import { ThemeToggle } from './theme-toggle'
 import { LanguageToggle } from './language-toggle'
 const navItems = [
+  { to: '/instrumente', label: 'Funcții' },
   { to: '/cursuri', label: 'Cursuri' },
   { to: '/practica', label: 'Practica zilnică' },
   { to: '/simulari', label: 'Simulări examen' },
@@ -39,7 +40,7 @@ export function SiteHeader() {
         <Logo />
         <nav
           aria-label={t('Principal')}
-          className="ml-4 hidden items-center gap-1 lg:flex"
+          className="ml-4 hidden items-center gap-1 xl:flex"
         >
           {navItems.map((item) => (
             <Link
@@ -75,7 +76,7 @@ export function SiteHeader() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="lg:hidden"
+                className="xl:hidden"
                 aria-label={t('Deschide meniul')}
               >
                 <Menu />

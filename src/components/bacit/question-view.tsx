@@ -6,6 +6,7 @@ import type { ChoiceQuestion, MatchingQuestion, Question } from '@/data/question
 import { isCorrect, questionTypeLabels, type Answer } from '@/lib/quiz'
 import { hashString, seededRandom, shuffle } from '@/lib/random'
 import { cn } from '@/lib/utils'
+import { ExtendedQuestionInput, QuestionNote } from './question-tools'
 export function CodeBlock({ code }: { code: string }) {
   return (
     <pre className="overflow-x-auto rounded-xl bg-code-bg p-4 text-[13px] leading-relaxed text-code-fg">
@@ -42,7 +43,14 @@ export function QuestionView({
       </h3>
       {question.code && <CodeBlock code={question.code} />}
       {t(
-        question.type === 'matching' ? (
+        question.type === 'sequence' || question.type === 'fill_blank' ? (
+          <ExtendedQuestionInput
+            question={question}
+            answer={answer}
+            onChange={onChange}
+            revealed={revealed}
+          />
+        ) : question.type === 'matching' ? (
           <MatchingInput
             question={question}
             value={(answer as Record<string, string>) ?? {}}
@@ -58,6 +66,7 @@ export function QuestionView({
           />
         ),
       )}
+      <QuestionNote question={question} />
       {t(
         revealed && (
           <div
@@ -166,7 +175,7 @@ function MatchingInput({
   onChange: (answer: Record<string, string>) => void
   revealed: boolean
 }) {
-  const { t, format } = useI18n()
+  const { t, format, pick } = useI18n()
   const chips = useMemo(
     () =>
       shuffle(
@@ -180,6 +189,7 @@ function MatchingInput({
   const used = new Set(Object.values(value))
   const available = chips.filter((c) => !used.has(c))
   function place(target: string, chip: string) {
+    if (revealed || !chips.includes(chip)) return
     const next = { ...value }
     for (const [t, c] of Object.entries(next)) if (c === chip) delete next[t]
     next[target] = chip
@@ -216,17 +226,17 @@ function MatchingInput({
             draggable={!revealed}
             disabled={revealed}
             onDragStart={(e) => {
-              e.dataTransfer.setData('text/plain', chip)
+              e.dataTransfer.setData('application/x-bacit-match', chip)
               e.dataTransfer.effectAllowed = 'move'
             }}
             onClick={() => setPicked(picked === chip ? null : chip)}
             aria-pressed={picked === chip}
             className={cn(
-              'inline-flex cursor-grab items-center gap-1 rounded-full border border-primary/25 bg-accent px-3.5 py-1.5 font-mono text-xs font-semibold text-accent-foreground shadow-xs transition-colors hover:border-primary active:cursor-grabbing motion-reduce:transition-none',
+              'inline-flex min-h-10 max-w-full cursor-grab items-center gap-1 rounded-2xl border border-primary/25 bg-accent px-3.5 py-1.5 text-left text-sm wrap-anywhere text-accent-foreground shadow-xs transition-colors hover:border-primary active:cursor-grabbing motion-reduce:transition-none',
               picked === chip && 'border-primary bg-primary text-primary-foreground',
             )}
           >
-            <GripVertical className="size-3 opacity-60" aria-hidden />
+            <GripVertical className="size-3 shrink-0 opacity-60" aria-hidden />
             {t(chip)}
           </button>
         ))}
@@ -240,7 +250,11 @@ function MatchingInput({
             <div
               key={pair.target}
               onDragOver={(e) => {
-                if (revealed) return
+                if (
+                  revealed ||
+                  !e.dataTransfer.types.includes('application/x-bacit-match')
+                )
+                  return
                 e.preventDefault()
                 setHover(pair.target)
               }}
@@ -248,11 +262,11 @@ function MatchingInput({
               onDrop={(e) => {
                 e.preventDefault()
                 setHover(null)
-                const chip = e.dataTransfer.getData('text/plain')
+                const chip = e.dataTransfer.getData('application/x-bacit-match')
                 if (chip) place(pair.target, chip)
               }}
               className={cn(
-                'grid grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)] items-center gap-3 px-4 py-2.5 text-sm',
+                'grid items-center gap-2 px-4 py-3 text-sm sm:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] sm:gap-3',
                 i > 0 && 'border-t',
                 hover === pair.target && 'bg-accent',
                 right && 'bg-success-soft',
@@ -265,9 +279,16 @@ function MatchingInput({
                   <button
                     type="button"
                     disabled={revealed}
-                    onClick={() => remove(pair.target)}
-                    className="inline-flex w-fit items-center gap-1.5 rounded-full border bg-card px-3 py-1 font-mono text-xs font-semibold"
-                    aria-label={format('{0} — apasă pentru a scoate', [placed])}
+                    onClick={() =>
+                      picked ? place(pair.target, picked) : remove(pair.target)
+                    }
+                    className="inline-flex min-h-10 w-fit max-w-full items-center gap-1.5 rounded-xl border bg-card px-3 py-1 text-left text-sm wrap-anywhere"
+                    aria-label={
+                      picked
+                        ? pick('Înlocuiește răspunsul pentru ', 'Replace answer for ') +
+                          t(pair.target)
+                        : format('{0} — apasă pentru a scoate', [placed])
+                    }
                   >
                     {right && <CircleCheck className="size-3.5 text-success" />}
                     {wrong && <CircleX className="size-3.5 text-destructive" />}
@@ -278,18 +299,21 @@ function MatchingInput({
                     type="button"
                     disabled={revealed || !picked}
                     onClick={() => picked && place(pair.target, picked)}
+                    aria-label={pick('Loc pentru ', 'Answer slot for ') + t(pair.target)}
                     className={cn(
-                      'h-8 rounded-md border border-dashed px-3 text-left text-xs text-muted-foreground',
+                      'min-h-10 rounded-md border border-dashed px-3 py-2 text-left text-sm wrap-anywhere text-muted-foreground',
                       picked && 'border-primary text-primary',
                     )}
                   >
-                    {t(picked ? `Plasează „${picked}”` : 'Apasă aici')}
+                    {picked
+                      ? pick('Plasează aici', 'Place here')
+                      : pick('Loc pentru răspuns', 'Answer slot')}
                   </button>
                 ),
               )}
               {t(
                 wrong && (
-                  <span className="col-start-2 text-xs text-success">
+                  <span className="text-xs wrap-anywhere text-success sm:col-start-2">
                     {t('Corect: ')}
                     <strong className="font-mono">{t(pair.answer)}</strong>
                   </span>

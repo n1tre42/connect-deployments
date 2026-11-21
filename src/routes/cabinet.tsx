@@ -42,7 +42,7 @@ const allQuestions = courses.flatMap((c) =>
   questionsFor(c.id).map((q) => ({ question: q, courseId: c.id })),
 )
 function CabinetPage() {
-  const { t, format, locale } = useI18n()
+  const { t, pick, format, locale } = useI18n()
   const progress = useProgress()
   const days = history(progress, 14, locale)
   const maxDay = Math.max(1, ...days.map((d) => d.count))
@@ -128,7 +128,9 @@ function CabinetPage() {
         </section>
 
         <section className="rounded-2xl border bg-card p-5 shadow-xs">
-          <h2 className="mb-4 font-bold">{t('Stăpânire pe cursuri')}</h2>
+          <h2 className="mb-4 font-bold">
+            {pick('Concepte exersate', 'Practiced concepts')}
+          </h2>
           <ul className="space-y-4">
             {courses.map((course) => {
               const lessons = course.modules.flatMap((m) => m.lessons)

@@ -1,1 +1,8 @@
 pnpm-lock.yaml
+
+.output/
+.cache/
+dist/
+node_modules/
+.vercel/
+.tanstack/

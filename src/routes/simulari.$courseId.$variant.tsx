@@ -36,6 +36,7 @@ import {
 } from '@/lib/progress'
 import { isAnswered, isCorrect, type Answer } from '@/lib/quiz'
 import { cn } from '@/lib/utils'
+import { ScoreNote } from '@/components/bacit/score-note'
 export const Route = createFileRoute('/simulari/$courseId/$variant')({
   loader: ({ params }) => {
     const course = getCourse(params.courseId)
@@ -66,6 +67,7 @@ function ExamPage() {
   } | null>(null)
   return (
     <div className="mx-auto max-w-content px-4 py-6 sm:px-6">
+      <ScoreNote />
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <Button asChild variant="ghost" size="sm">
           <Link to="/simulari" hash={course.id}>

@@ -6,6 +6,7 @@ import { courses, getCourse } from '@/data/courses'
 import { questionsFor } from '@/data/questions'
 import { pythonLabs } from '@/data/python-labs'
 import { useI18n } from '@/lib/i18n'
+import { ProgressRestore } from './progress-restore'
 import { answeredTodayTotal, mastery, setDailyGoal, useProgress } from '@/lib/progress'
 export function LearningOverview() {
   const { pick, t } = useI18n()
@@ -38,13 +39,7 @@ export function LearningOverview() {
   const todayGoal = progress.dailyGoal * courses.length
   function backup() {
     const blob = new Blob(
-      [
-        JSON.stringify(
-          { version: 1, exportedAt: new Date().toISOString(), progress },
-          null,
-          2,
-        ),
-      ],
+      [JSON.stringify({ format: 'bacit-progress', version: 1, progress }, null, 2)],
       { type: 'application/json' },
     )
     const url = URL.createObjectURL(blob)
@@ -146,6 +141,7 @@ export function LearningOverview() {
           </Button>
         </section>
       </div>
+      <ProgressRestore />
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-xs text-muted-foreground">
           {pick(

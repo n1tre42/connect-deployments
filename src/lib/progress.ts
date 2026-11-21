@@ -1,4 +1,6 @@
 import { useSyncExternalStore } from 'react'
+import { questionById } from '@/data/questions'
+import { validateProgressImport } from './progress-import'
 
 /**
  * Learner progress, kept in localStorage so it works without an account.
@@ -49,7 +51,7 @@ export type ProgressState = {
   profile: Profile
 }
 
-const STORAGE_KEY = 'bacit-progress-v1'
+export const STORAGE_KEY = 'bacit-progress-v1'
 
 const defaultProfile: Profile = {
   name: 'Elev BacIt',
@@ -182,7 +184,10 @@ export function recordAnswer(
       [questionId]: {
         correct,
         attempts: (prev?.attempts ?? 0) + 1,
-        at: Date.now(),
+        at: Math.max(
+          Date.now(),
+          ...Object.values(s.answers).map((answer) => answer.at + 1),
+        ),
       },
     }
     let daily = s.daily
@@ -222,6 +227,15 @@ export function recordExam(exam: Omit<ExamRecord, 'id' | 'at'>) {
 
 export function updateProfile(profile: Profile) {
   update((s) => ({ ...s, profile }))
+}
+
+export function importProgress(value: unknown) {
+  const restored = validateProgressImport(value)
+  update(() => ({
+    ...initialState,
+    ...restored,
+    profile: { ...defaultProfile, ...restored.profile },
+  }))
 }
 
 export function resetProgress() {
@@ -271,6 +285,14 @@ export function history(s: ProgressState, days = 14, locale = 'ro-RO') {
 /** Percent of the given questions whose latest answer was correct. */
 export function mastery(s: ProgressState, questionIds: string[]) {
   if (!questionIds.length) return 0
-  const correct = questionIds.filter((id) => s.answers[id]?.correct).length
-  return Math.round((correct / questionIds.length) * 100)
+  const concepts = new Map<string, { correct: boolean; at: number } | undefined>()
+  for (const id of questionIds) {
+    const key = questionById.get(id)?.conceptId ?? id
+    const answer = s.answers[id]
+    const previous = concepts.get(key)
+    if (!concepts.has(key) || (answer && (!previous || answer.at > previous.at)))
+      concepts.set(key, answer)
+  }
+  const correct = [...concepts.values()].filter((answer) => answer?.correct).length
+  return Math.round((correct / concepts.size) * 100)
 }

@@ -3,6 +3,7 @@ import contextlib
 import io
 import json
 import os
+import sqlite3
 import sys
 from pathlib import Path
 
@@ -36,4 +37,17 @@ for lab in fixtures['labs']:
         pass
     else:
         raise AssertionError(f"Starter should require implementation: {lab['id']}")
-print(json.dumps({'outputQuestions': count, 'labSolutions': len(fixtures['labs']), 'status': 'passed'}))
+for question in fixtures.get('sql', []):
+    setup, query = question['code'].strip().removesuffix(';').rsplit(';', 1)
+    with sqlite3.connect(':memory:') as db:
+        db.executescript(setup + ';')
+        actual = db.execute(query).fetchall()
+        assert actual == [(int(question['expected']),)], (
+            f"{question['id']}: {actual!r} != {question['expected']!r}"
+        )
+print(json.dumps({
+    'outputQuestions': count,
+    'labSolutions': len(fixtures['labs']),
+    'sqlQueries': len(fixtures.get('sql', [])),
+    'status': 'passed',
+}))

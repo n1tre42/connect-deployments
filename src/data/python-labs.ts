@@ -4,6 +4,7 @@ import { pythonNextModules } from './python-next'
 export type PythonLab = {
   id: string
   module: string
+  objectiveIds?: string[]
   title: string
   task: string
   starter: string
@@ -289,6 +290,20 @@ export const pythonLabs: PythonLab[] = specs.map(
   ([ro, en, taskRo, taskEn, signature, body, tests], i) => ({
     id: `python-ng-lab-${String(i + 1).padStart(2, '0')}`,
     module: pythonNextModules[Math.floor(i / 3)][0],
+    objectiveIds:
+      i < 3
+        ? ['1.2', '4.2']
+        : i < 6
+          ? ['2.1', '2.2']
+          : i < 9
+            ? ['1.2', '4.2']
+            : i < 12
+              ? ['4.2']
+              : i < 15
+                ? ['3.1']
+                : i < 18
+                  ? ['5.1', '5.2']
+                  : ['4.2'],
     title: b(ro, en),
     task: b(taskRo, taskEn),
     starter: `${signature}\n    # TODO\n    raise NotImplementedError\n`,

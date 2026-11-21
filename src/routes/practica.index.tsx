@@ -39,6 +39,11 @@ function PracticePage() {
           [progress.dailyGoal],
         )}
       />
+      <div className="mb-5">
+        <Button asChild variant="outline">
+          <Link to="/exercitii">{t('Exerciții pe teme și formate')}</Link>
+        </Button>
+      </div>
       <div className="grid gap-5 lg:grid-cols-3">
         <div className="rounded-2xl border bg-card p-5 shadow-xs">
           <div className="flex items-center gap-4">

@@ -15,7 +15,7 @@ const features = [
   { icon: Clock, text: 'Timp limitat, cu cronometru vizibil' },
   { icon: ListChecks, text: 'Alegere unică, multiplă, cod și drag and drop' },
   { icon: Flag, text: 'Marchezi întrebările pentru revizuire' },
-  { icon: Target, text: 'Scor pe scara 0–1000, promovare de la 700' },
+  { icon: Target, text: 'Scor de antrenament BacIt — nu este scorul oficial Certiport' },
 ]
 function ExamsPage() {
   const { t } = useI18n()
@@ -24,9 +24,9 @@ function ExamsPage() {
     <div className="mx-auto max-w-content px-4 sm:px-6">
       <PageHeader
         eyebrow={t('Simulări de examen')}
-        title={t('Trei simulări pentru fiecare examen')}
+        title={t('Testează ce ai înțeles')}
         description={t(
-          'La finalul cursului, verifică-te în condiții de examen: fără indicii până la predare, apoi raport detaliat pe fiecare domeniu.',
+          'Variante de antrenament fără indicii până la predare. Scorul procentual BacIt nu reproduce formula normalizată Certiport. Pentru Python NG, folosește și repetiția pe secțiuni.',
         )}
       />
       <ul className="mb-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -40,6 +40,11 @@ function ExamsPage() {
           </li>
         ))}
       </ul>
+      <p className="mb-6 rounded-xl border bg-accent p-4 text-sm">
+        {t(
+          '700 de puncte Certiport nu înseamnă automat 70% răspunsuri corecte. Pragul de 70% de aici este doar un obiectiv de antrenament.',
+        )}
+      </p>
       <div className="space-y-10">
         {courses.map((course) => (
           <section key={course.id} id={course.id} className="scroll-mt-24">

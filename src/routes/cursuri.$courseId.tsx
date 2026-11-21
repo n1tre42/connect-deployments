@@ -20,6 +20,8 @@ import { questionsFor } from '@/data/questions'
 import { mastery, rememberLesson, toggleWatched, useProgress } from '@/lib/progress'
 import { hashString, seededRandom, shuffle } from '@/lib/random'
 import { cn } from '@/lib/utils'
+import { LessonNotes } from '@/components/bacit/lesson-notes'
+import { CourseAlignment } from '@/components/bacit/course-alignment'
 export const Route = createFileRoute('/cursuri/$courseId')({
   validateSearch: (
     search: Record<string, unknown>,
@@ -151,6 +153,11 @@ function CoursePage() {
             </div>
           </section>
 
+          <LessonNotes
+            lesson={current.lesson}
+            courseId={course.id}
+            moduleId={current.module.id}
+          />
           <LessonQuiz
             key={current.lesson.id}
             course={course}
@@ -158,18 +165,24 @@ function CoursePage() {
             lesson={current.lesson}
             next={next?.lesson}
           />
+          <CourseAlignment courseId={course.id} />
           <ModuleResources module={current.module} />
 
           <div className="flex justify-between gap-3">
             {t(
               prev ? (
-                <Button asChild variant="ghost">
+                <Button
+                  asChild
+                  variant="ghost"
+                  className="min-w-0 max-w-[48%] shrink whitespace-normal"
+                >
                   <Link
                     to="/cursuri/$courseId"
                     params={{ courseId: course.id }}
                     search={{ lectie: prev.lesson.id }}
                   >
-                    <ChevronLeft /> {t(prev.lesson.title)}
+                    <ChevronLeft />{' '}
+                    <span className="truncate">{t(prev.lesson.title)}</span>
                   </Link>
                 </Button>
               ) : (
@@ -178,13 +191,18 @@ function CoursePage() {
             )}
             {t(
               next && (
-                <Button asChild variant="ghost">
+                <Button
+                  asChild
+                  variant="ghost"
+                  className="min-w-0 max-w-[48%] shrink whitespace-normal"
+                >
                   <Link
                     to="/cursuri/$courseId"
                     params={{ courseId: course.id }}
                     search={{ lectie: next.lesson.id }}
                   >
-                    {t(next.lesson.title)} <ChevronRight />
+                    <span className="truncate">{t(next.lesson.title)}</span>{' '}
+                    <ChevronRight />
                   </Link>
                 </Button>
               ),
